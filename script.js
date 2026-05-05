@@ -147,56 +147,58 @@ function updateBall() {
     if (ball.x - ball.radius < 0) {
         computerScore++;
         resetBall();
+        checkWinCondition();
     } else if (ball.x + ball.radius > canvas.width) {
         playerScore++;
         resetBall();
+        checkWinCondition();
     }
 
     // Update scores
     document.getElementById('playerScore').textContent = playerScore;
     document.getElementById('computerScore').textContent = computerScore;
+}
 
-    // Check for win condition
+function checkWinCondition() {
     if (playerScore >= 10 || computerScore >= 10) {
         gameRunning = false;
         const winner = playerScore >= 10 ? 'Player' : 'Computer';
         setTimeout(() => {
             alert(`${winner} wins! Game Over!\nFinal Score - Player: ${playerScore}, Computer: ${computerScore}`);
-            resetGame();
-        }, 100);
+        }, 500);
     }
 }
 
-function collideWithPaddle(paddle) {
+function collideWithPaddle(paddleObj) {
     // Check if ball is within paddle's vertical range
     if (
-        ball.x - ball.radius < paddle.x + paddle.width &&
-        ball.x + ball.radius > paddle.x &&
-        ball.y < paddle.y + paddle.height &&
-        ball.y > paddle.y
+        ball.x - ball.radius < paddleObj.x + paddleObj.width &&
+        ball.x + ball.radius > paddleObj.x &&
+        ball.y < paddleObj.y + paddleObj.height &&
+        ball.y > paddleObj.y
     ) {
-        // Collision detected
-        ball.dx = -ball.dx;
-
-        // Add spin based on where ball hits the paddle
-        const collidePoint = ball.y - (paddle.y + paddle.height / 2);
-        collidePoint /= (paddle.height / 2);
-        
-        const angleRad = (Math.PI / 4) * collidePoint;
-        const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-        
-        ball.dx = speed * Math.cos(angleRad) * (ball.dx > 0 ? 1 : -1);
-        ball.dy = speed * Math.sin(angleRad);
-
-        // Ensure ball moves away from paddle
-        if (paddle === this && ball.dx < 0) {
+        // Only collide if ball is moving towards the paddle
+        if ((paddleObj === paddle && ball.dx < 0) || (paddleObj === computer && ball.dx > 0)) {
+            // Collision detected
             ball.dx = -ball.dx;
-        } else if (paddle !== this && ball.dx > 0) {
-            ball.dx = -ball.dx;
+
+            // Add spin based on where ball hits the paddle
+            const collidePoint = ball.y - (paddleObj.y + paddleObj.height / 2);
+            const normalizedCollide = collidePoint / (paddleObj.height / 2);
+            
+            const angleRad = (Math.PI / 4) * normalizedCollide;
+            const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+            
+            ball.dx = speed * Math.cos(angleRad) * (ball.dx > 0 ? 1 : -1);
+            ball.dy = speed * Math.sin(angleRad);
+
+            // Reposition ball to avoid overlap
+            if (paddleObj === paddle) {
+                ball.x = paddleObj.x + paddleObj.width + ball.radius;
+            } else {
+                ball.x = paddleObj.x - ball.radius;
+            }
         }
-
-        // Reposition ball to avoid overlap
-        ball.x = paddle.x + (paddle.x < canvas.width / 2 ? paddle.width : -ball.radius * 2);
     }
 }
 
