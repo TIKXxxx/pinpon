@@ -83,6 +83,7 @@ A classic Pong game built with HTML5, CSS3, and JavaScript. Play against an inte
 
 ---
 
-**Made with ❤️ using HTML, CSS, and JavaScript**
+**"Made with ❤️ using HTML, CSS, and JavaScript"**
+**-Leandro Java**
 
 Enjoy the game! 🎮✨
